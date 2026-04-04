@@ -1,0 +1,35 @@
+{
+  "name": "fluidui-layout-engine",
+  "version": "0.1.0",
+  "description": "DOM-free, renderer-agnostic layout engine for UI components",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist/src"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "build:test": "npm run clean && tsc -p tsconfig.test.json",
+    "test": "npm run build:test && node --test dist/test/*.test.js",
+    "example:dashboard": "npm run build && node dist/src/examples/dashboard.js",
+    "example:react": "cd examples/react-dashboard && npm run dev"
+  },
+  "keywords": [
+    "layout",
+    "engine",
+    "ui",
+    "typescript",
+    "dom-free"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "typescript": "^5.8.3"
+  }
+}
