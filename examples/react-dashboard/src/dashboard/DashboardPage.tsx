@@ -1,4 +1,4 @@
-import { type LayoutType } from "@engine";
+import { type LayoutType } from "@fluidui/core";
 import { useMemo, useState } from "react";
 import { DashboardCanvas } from "./DashboardCanvas";
 import { type BuilderDensity, buildDemoNodes, type WidgetCounts } from "./componentFactory";
@@ -172,7 +172,7 @@ export function DashboardPage(): JSX.Element {
                 <button
                   key={option}
                   type="button"
-                  className={`builder-chip ${layoutType === option ? "is-active" : ""}`}
+                  className={`builder-chip ${layoutType === option ? "is-active" : "/core"}`}
                   onClick={() => {
                     setActiveSkeleton("custom");
                     setLayoutType(option);
@@ -191,7 +191,7 @@ export function DashboardPage(): JSX.Element {
                 <button
                   key={mode}
                   type="button"
-                  className={`builder-chip ${density === mode ? "is-active" : ""}`}
+                  className={`builder-chip ${density === mode ? "is-active" : "/core"}`}
                   onClick={() => {
                     setActiveSkeleton("custom");
                     setDensity(mode);

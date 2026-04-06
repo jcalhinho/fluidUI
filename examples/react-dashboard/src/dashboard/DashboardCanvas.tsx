@@ -1,4 +1,4 @@
-import { computeLayout, prepare, type LayoutBox, type LayoutType, type Node } from "@engine";
+import { computeLayout, prepare, type LayoutBox, type LayoutType, type Node } from "@fluidui/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useContainerWidth } from "../layout/useContainerWidth";
 import { isWidgetPayload } from "./types";
@@ -398,9 +398,9 @@ export function DashboardCanvas({ nodes, layoutType = "masonry" }: DashboardCanv
                     key={box.id}
                     className={[
                       "dashboard-box",
-                      isLocked ? "is-locked" : "",
-                      isDragging ? "is-drag-source" : "",
-                      isDropTarget ? "is-drop-target" : "",
+                      isLocked ? "is-locked" : "/core",
+                      isDragging ? "is-drag-source" : "/core",
+                      isDropTarget ? "is-drop-target" : "/core",
                     ]
                       .filter(Boolean)
                       .join(" ")}

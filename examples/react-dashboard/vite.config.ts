@@ -42,7 +42,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@engine": path.resolve(rootDir, "src/index.ts"),
+      "@fluidui/core": path.resolve(rootDir, "packages/core/src/index.ts"),
       "@example": path.resolve(__dirname, "src")
     }
   },

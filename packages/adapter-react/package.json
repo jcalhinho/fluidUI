@@ -1,0 +1,22 @@
+{
+  "name": "@fluidui/adapter-react",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React adapter primitives for @fluidui/core",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "@fluidui/core": "file:../core"
+  }
+}

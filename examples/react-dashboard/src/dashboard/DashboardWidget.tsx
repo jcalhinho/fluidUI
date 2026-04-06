@@ -1,4 +1,4 @@
-import type { Node } from "@engine";
+import type { Node } from "@fluidui/core";
 import { Suspense, lazy } from "react";
 import { ActivityFeed } from "../ui/ActivityFeed";
 import { AlertsPanel } from "../ui/AlertsPanel";
@@ -97,7 +97,7 @@ export function DashboardWidget({ node, isDragging = false, isLocked = false }: 
 
   return (
     <article
-      className={`widget widget-${widgetType}${isDragging ? " is-dragging" : ""}${isHeaderWidget ? " is-compact-header" : ""}`}
+      className={`widget widget-${widgetType}${isDragging ? " is-dragging" : "/core"}${isHeaderWidget ? " is-compact-header" : "/core"}`}
       aria-label={title}
     >
       {!isHeaderWidget && (

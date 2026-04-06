@@ -7,6 +7,10 @@
   "files": [
     "dist/src"
   ],
+  "workspaces": [
+    "packages/*",
+    "examples/react-dashboard"
+  ],
   "scripts": {
     "clean": "rm -rf dist",
     "prepare": "npm run build",

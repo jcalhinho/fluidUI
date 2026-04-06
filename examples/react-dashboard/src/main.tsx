@@ -4,7 +4,7 @@ import {
   configureTextMeasurement,
   getTextMeasurementRuntimeState,
   initializePretextTextMeasurement
-} from "@engine";
+} from "@fluidui/core";
 import { App } from "./App";
 import "./styles.css";
 
