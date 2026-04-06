@@ -126,7 +126,8 @@ export function AboutPage(): JSX.Element {
       <section className="about-section">
         <h2>Reproduce locally</h2>
         <pre className="about-code">
-{`npm run test
+{`# from examples/react-dashboard
+npm run test
 npm run bench
 npm run bench:ci`}
         </pre>

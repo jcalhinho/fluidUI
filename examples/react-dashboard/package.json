@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "lint": "npm run lint:example --prefix ../..",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "bench": "npm run bench --prefix ../..",
+    "bench:ci": "npm run bench:ci --prefix ../.."
   },
   "dependencies": {
     "echarts": "^6.0.0",

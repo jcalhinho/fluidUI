@@ -4,6 +4,25 @@ A DOM-independent, renderer-agnostic UI layout engine for dynamic dashboards and
 
 `fluidui-layout-engine` separates expensive measurement from fast layout computation so you can reliably render complex UI structures in real time across browser and Node.js runtimes.
 
+Branding:
+- Product name: `fluidUI`
+- npm package: `fluidui-layout-engine`
+
+## Product Promise
+
+Stop using runtime DOM measurements as your layout source of truth.
+
+fluidUI gives you a deterministic pipeline:
+1. `prepare(nodes)` once
+2. `computeLayout(prepared, options)` many times
+3. render in DOM, Canvas, SSR, or a custom renderer
+
+This is where fluidUI becomes materially better than ad-hoc layout logic:
+- drag-and-drop dashboard builders with frequent relayout
+- virtualization where stable, predictable box geometry matters
+- SSR/export pipelines (PDF/image snapshots) that need deterministic layout
+- renderer portability (DOM today, Canvas/worker renderer tomorrow)
+
 ## Why fluidUI
 
 - DOM-independent core logic in layout computation.
@@ -14,6 +33,16 @@ A DOM-independent, renderer-agnostic UI layout engine for dynamic dashboards and
 - Optional high-quality text measurement via Pretext with automatic heuristic fallback.
 - Renderer-agnostic: usable with DOM, Canvas, SSR, or custom renderers.
 - Virtualization-friendly and export-friendly by design.
+
+## Why Not Just CSS Grid?
+
+CSS Grid is great for static or mildly dynamic layouts.
+
+fluidUI is for cases where layout is computed data:
+- heterogeneous widgets with variable intrinsic sizes
+- repeated width recalculation loops (responsive + drag + resize)
+- deterministic output requirements across environments
+- explicit control over placement strategies (`vertical`, `grid`, `masonry`)
 
 ## Inspiration: Pretext -> fluidUI
 
@@ -50,6 +79,39 @@ Comparison:
 | Determinism | Can drift across timing/reflow paths | Stable: same input -> same output |
 | Renderer portability | Mostly tied to browser DOM | DOM, Canvas, SSR, custom renderers |
 | Frequent relayouts | More costly (measure + layout loops) | Faster (`computeLayout` on prepared data) |
+
+## Benchmark Snapshot
+
+Reference sample from [`bench/results/ci-benchmark.json`](bench/results/ci-benchmark.json):
+
+| Metric | Value |
+| --- | --- |
+| Dataset size | 320 nodes |
+| Width count | 18 |
+| `prepare()` median | 3.12 ms |
+| `computeLayout()` many widths median | 0.15 ms |
+| Predictive total median (`prepare` + many layouts) | 3.26 ms |
+| Naive total median (re-prepare each frame) | 62.00 ms |
+| Median speedup | 19.03x |
+
+To reproduce:
+
+```bash
+npm run bench
+npm run bench:ci
+```
+
+## Live Demo
+
+React example dashboard:
+- [`examples/react-dashboard`](examples/react-dashboard)
+
+GitHub Pages deployment workflow:
+- [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+
+Default URL pattern after deployment:
+- `https://<owner>.github.io/<repo>/`
+- About/Inspiration/Benchmarks view: append `#about`
 
 ## Installation
 
