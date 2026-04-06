@@ -22,10 +22,31 @@ npm run lint
 
 Open `http://localhost:5173`.
 
+## Deploy to GitHub Pages
+
+This repository includes a Pages workflow:
+
+- [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
+
+Steps:
+
+1. Push your branch to `main` (or trigger the workflow manually from the Actions tab).
+2. In GitHub repo settings, set **Pages > Source** to **GitHub Actions**.
+3. The workflow builds `examples/react-dashboard/dist` and publishes it.
+
+URL format:
+
+- Project pages: `https://<owner>.github.io/<repo>/`
+- User/org pages repo (`<owner>.github.io`): `https://<owner>.github.io/`
+- About/Inspiration/Benchmarks section: append `#about`
+
+The workflow automatically sets the correct Vite base path for both cases.
+
 ## What the demo includes
 
 - Local component factory (`componentFactory.ts`) for realistic widget payloads
 - Top header builder (horizontal) with template dropdown
+- Built-in `Builder` / `About` tabs (`#builder` and `#about`)
 - **30 templates** accessible from the dropdown, with one-click generation
 - Layout switcher + density mode + seed randomization in the same control bar
 - Real stress mode: component multiplication + heavy content payloads
