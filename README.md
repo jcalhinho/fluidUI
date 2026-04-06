@@ -105,6 +105,8 @@ npm run bench:ci
 
 React example dashboard:
 - [`examples/react-dashboard`](examples/react-dashboard)
+- Demo URL: `https://jcalhinho.github.io/fluidUI/`
+- About/Inspiration/Benchmarks: `https://jcalhinho.github.io/fluidUI/#about`
 
 GitHub Pages deployment workflow:
 - [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
