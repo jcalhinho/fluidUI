@@ -122,7 +122,12 @@ function buildNode(
         id: `bignumber-${index + 1}`,
         type: "card",
         content: buildBigNumberPayload(index, random),
-        intrinsicSize: scaleSize({ width: 360, height: 220 }, densityFactor),
+        intrinsicSize: scaleSizeWithMinimums(
+          { width: 360, height: 220 },
+          densityFactor,
+          220,
+          190,
+        ),
       };
     case "kpi":
       return {
@@ -213,9 +218,18 @@ function buildNode(
 }
 
 function scaleSize(size: { width: number; height: number }, densityFactor: number): { width: number; height: number } {
+  return scaleSizeWithMinimums(size, densityFactor, 220, 140);
+}
+
+function scaleSizeWithMinimums(
+  size: { width: number; height: number },
+  densityFactor: number,
+  minWidth: number,
+  minHeight: number,
+): { width: number; height: number } {
   return {
-    width: Math.max(220, Math.round(size.width / densityFactor)),
-    height: Math.max(140, Math.round(size.height / densityFactor)),
+    width: Math.max(minWidth, Math.round(size.width / densityFactor)),
+    height: Math.max(minHeight, Math.round(size.height / densityFactor)),
   };
 }
 

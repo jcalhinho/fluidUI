@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { BigNumberPayload } from "../dashboard/types";
+import { computeBigNumberFontSize } from "./bigNumberSizing";
 
 interface BigNumberProps {
   payload: BigNumberPayload;
@@ -14,6 +15,7 @@ export function BigNumber({ payload }: BigNumberProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<HTMLDivElement>(null);
   const [fontSize, setFontSize] = useState<number>(72);
+  const lastGoodFontSizeRef = useRef<number>(72);
 
   // Fit the value size to the available space.
   useEffect(() => {
@@ -22,32 +24,53 @@ export function BigNumber({ payload }: BigNumberProps): JSX.Element {
     if (!container || !valueEl) return;
 
     const fit = (): void => {
-      const available = container.clientWidth - 32; // 16px horizontal padding on each side
-      const available_h = container.clientHeight - 80; // reserve space for label + delta
+      const availableWidth = container.clientWidth - 32; // 16px horizontal padding on each side
+      const availableHeight = container.clientHeight - 80; // reserve space for label + delta
+      const previousInlineFontSize = valueEl.style.fontSize;
+      const fitted = computeBigNumberFontSize({
+        availableWidth,
+        availableHeight,
+        previousFontSize: lastGoodFontSizeRef.current,
+        measure: (candidateFontSize: number) => {
+          valueEl.style.fontSize = `${candidateFontSize}px`;
+          return {
+            width: valueEl.scrollWidth,
+            height: valueEl.scrollHeight,
+          };
+        },
+      });
+      valueEl.style.fontSize = previousInlineFontSize;
 
-      // Binary search between 24px and 120px
-      let lo = 24;
-      let hi = Math.min(120, available_h * 0.65);
-      let best = lo;
+      if (!Number.isFinite(fitted)) return;
 
-      for (let iter = 0; iter < 10; iter++) {
-        const mid = (lo + hi) / 2;
-        valueEl.style.fontSize = `${mid}px`;
-        if (valueEl.scrollWidth <= available) {
-          best = mid;
-          lo = mid;
-        } else {
-          hi = mid;
-        }
-      }
-      setFontSize(best);
+      const normalized = Math.round(fitted * 10) / 10;
+      lastGoodFontSizeRef.current = normalized;
+      setFontSize((current) =>
+        Math.abs(current - normalized) < 0.1 ? current : normalized
+      );
     };
 
-    fit();
-    const ro = new ResizeObserver(fit);
+    let rafId: number | null = null;
+    const scheduleFit = (): void => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        fit();
+      });
+    };
+
+    scheduleFit();
+    const ro = new ResizeObserver(scheduleFit);
     ro.observe(container);
-    return () => ro.disconnect();
-  }, [payload.value]);
+    return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      ro.disconnect();
+    };
+  }, [payload.delta, payload.label, payload.sublabel, payload.value]);
 
   const toneClass =
     payload.tone === "positive"
