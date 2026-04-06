@@ -9,10 +9,17 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "prepack": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test --max-warnings=0",
+    "lint:example": "eslint examples/react-dashboard/src examples/react-dashboard/vite.config.ts examples/react-dashboard/vitest.config.ts --max-warnings=0",
     "build": "npm run clean && tsc -p tsconfig.build.json",
     "build:test": "npm run clean && tsc -p tsconfig.test.json",
     "test": "npm run build:test && node --test dist/test/*.test.js",
+    "bench:dist": "node dist/test/benchmarks/engine-benchmark.js",
+    "bench": "npm run build:test && npm run bench:dist",
+    "bench:ci": "npm run build:test && node dist/test/benchmarks/engine-benchmark.js --ci --output bench/results/ci-benchmark.json",
     "example:dashboard": "npm run build && node dist/src/examples/dashboard.js",
     "example:react": "cd examples/react-dashboard && npm run dev"
   },
@@ -29,7 +36,11 @@
     "@chenglou/pretext": "^0.0.4"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.15.29",
-    "typescript": "^5.8.3"
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.58.0"
   }
 }

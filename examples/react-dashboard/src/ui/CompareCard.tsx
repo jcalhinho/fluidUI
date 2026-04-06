@@ -8,9 +8,6 @@ function formatValue(value: number, unit: ComparePayload["unit"]): string {
   if (unit === "%") {
     return `${value.toFixed(1)}%`;
   }
-  if (unit === "€") {
-    return `€${Math.round(value).toLocaleString()}`;
-  }
   return Math.round(value).toLocaleString();
 }
 

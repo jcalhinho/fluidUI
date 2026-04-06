@@ -6,6 +6,18 @@ const rootDir = path.resolve(__dirname, "..", "..");
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("node_modules/zrender")) return "echarts-zrender";
+          if (id.includes("node_modules/echarts")) return "echarts-runtime";
+          return "vendor";
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@engine": path.resolve(rootDir, "src/index.ts"),
@@ -13,17 +25,6 @@ export default defineConfig({
     }
   },
   server: {
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:8787",
-        changeOrigin: true
-      },
-      "/ollama": {
-        target: "http://127.0.0.1:11434",
-        changeOrigin: true,
-        rewrite: (pathValue) => pathValue.replace(/^\/ollama/, "")
-      }
-    },
     fs: {
       allow: [rootDir]
     }

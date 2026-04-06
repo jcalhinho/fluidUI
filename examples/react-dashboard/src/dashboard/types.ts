@@ -2,17 +2,25 @@ export type Severity = "critical" | "high" | "medium" | "low";
 export type Tone = "positive" | "negative" | "neutral";
 export type DensityMode = "showcase" | "stress";
 
-export interface KpiPayload {
+export interface WidgetInsight {
+  confidence: number;
+  evidence: string[];
+}
+
+interface WidgetPayloadBase {
+  insight?: WidgetInsight;
+}
+
+export interface KpiPayload extends WidgetPayloadBase {
   widget: "kpi";
   title: string;
   subtitle: string;
   value: string;
   delta: string;
   tone: Tone;
-  sparkline: number[];
 }
 
-export interface LineChartPayload {
+export interface LineChartPayload extends WidgetPayloadBase {
   widget: "line";
   title: string;
   unit: string;
@@ -22,17 +30,17 @@ export interface LineChartPayload {
   tone: Tone;
 }
 
-export interface ComparePayload {
+export interface ComparePayload extends WidgetPayloadBase {
   widget: "compare";
   title: string;
   leftLabel: string;
   rightLabel: string;
   leftValue: number;
   rightValue: number;
-  unit: "%" | "€" | "count";
+  unit: "%" | "count";
 }
 
-export interface FunnelChartPayload {
+export interface FunnelChartPayload extends WidgetPayloadBase {
   widget: "funnel";
   title: string;
   stages: Array<{ label: string; value: number }>;
@@ -45,13 +53,13 @@ export interface AlertPayload {
   minutesAgo: number;
 }
 
-export interface AlertsPayload {
+export interface AlertsPayload extends WidgetPayloadBase {
   widget: "alerts";
   title: string;
   alerts: AlertPayload[];
 }
 
-export interface ActivityPayload {
+export interface ActivityPayload extends WidgetPayloadBase {
   widget: "activity";
   title: string;
   items: Array<{
@@ -63,7 +71,7 @@ export interface ActivityPayload {
   }>;
 }
 
-export interface IncidentPayload {
+export interface IncidentPayload extends WidgetPayloadBase {
   widget: "incidents";
   title: string;
   incidents: Array<{
@@ -74,17 +82,53 @@ export interface IncidentPayload {
   }>;
 }
 
-export interface TablePayload {
+export interface TablePayload extends WidgetPayloadBase {
   widget: "table";
   title: string;
   columns: string[];
   rows: Array<Record<string, string>>;
 }
 
-export interface SummaryPayload {
+export interface SummaryPayload extends WidgetPayloadBase {
   widget: "summary";
   title: string;
   text: string;
+}
+
+export interface DropcapPayload extends WidgetPayloadBase {
+  widget: "dropcap";
+  title: string;
+  text: string;
+  accent?: string;
+}
+
+export interface BigNumberPayload extends WidgetPayloadBase {
+  widget: "bignumber";
+  title: string;
+  value: string;
+  delta?: string;
+  tone?: Tone;
+  label?: string;
+  sublabel?: string;
+}
+
+export interface HeaderPayload extends WidgetPayloadBase {
+  widget: "header";
+  title: string;
+  subtitle: string;
+  eyebrow?: string;
+  badges?: string[];
+}
+
+export interface CollapsibleMenuPayload extends WidgetPayloadBase {
+  widget: "menu";
+  title: string;
+  groups: Array<{
+    id: string;
+    label: string;
+    defaultOpen?: boolean;
+    items: string[];
+  }>;
 }
 
 export type WidgetPayload =
@@ -96,7 +140,11 @@ export type WidgetPayload =
   | ActivityPayload
   | IncidentPayload
   | TablePayload
-  | SummaryPayload;
+  | SummaryPayload
+  | DropcapPayload
+  | BigNumberPayload
+  | HeaderPayload
+  | CollapsibleMenuPayload;
 
 export function isWidgetPayload(content: unknown): content is WidgetPayload {
   if (!content || typeof content !== "object") {

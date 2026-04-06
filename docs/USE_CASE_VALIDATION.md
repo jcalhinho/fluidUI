@@ -33,9 +33,21 @@ The following tests implement the validation matrix:
 ## Run
 
 ```bash
+npm run lint
 npm run typecheck
 npm run test
+npm run bench
 ```
+
+For CI threshold checks:
+
+```bash
+npm run bench:ci
+```
+
+Benchmark thresholds live in:
+
+- `bench/baseline.json`
 
 ## Next Expansion
 

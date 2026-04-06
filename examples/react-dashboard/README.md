@@ -1,6 +1,13 @@
-# React Dashboard Example
+# React Dashboard Example (Engine-First)
 
-Minimal React demo: one chatbot input, one generated dashboard output.
+This example is now focused on one thing:
+**rapid UI composition with the fluidUI engine (no AI flow, no backend dependency).**
+
+## Goal
+
+- Instantiate the most common dashboard UI components
+- Arrange them instantly with `computeLayout` (`masonry`, `grid`, `vertical`)
+- Keep the pipeline DOM-free at engine level (`prepare` + `computeLayout`)
 
 ## Run
 
@@ -9,41 +16,27 @@ From this folder:
 ```bash
 npm install
 npm run dev
+npm run test
+npm run lint
 ```
 
 Open `http://localhost:5173`.
 
-## What it demonstrates
+## What the demo includes
 
-- Predictive layout pipeline:
-  - `prepare(nodes)` once
-  - `computeLayout(prepared, options)` for the rendered result
-- Renderer-agnostic usage in React (absolute-positioned boxes)
-- Widget rendering (KPI, compare, line charts, funnel, alerts, incidents, table)
-- Pretext-backed text measurement activation at app bootstrap
-- AI composer flow:
-  - prompt -> mock RAG retrieval over multi-format docs (`pdf/csv/xlsx/docx/md/json`)
-  - strict JSON `DashboardSpec` generation
-  - JSON spec -> engine nodes -> predictive layout render
-  - provider strategy in code: `auto` (Ollama with fallback mock)
-  - networking:
-    - dev UI calls Ollama through Vite proxy: `/ollama -> http://127.0.0.1:11434`
-    - this avoids browser CORS issues against local Ollama
-  - prompt control:
-    - you can request explicit KPI count (example: `"dashboard with 8 kpi"`)
+- Local component factory (`componentFactory.ts`) for realistic widget payloads
+- Top header builder (horizontal) with template dropdown
+- **30 templates** accessible from the dropdown, with one-click generation
+- Layout switcher + density mode + seed randomization in the same control bar
+- Real stress mode: component multiplication + heavy content payloads
+- New narrative widget with **lettrine** (`dropcap`) to stress text measurement/wrapping
+- Fast drag/swap interactions on rendered boxes
+- Smoke tests with Vitest + Testing Library (`src/test`)
 
-## Files
+## Key files
 
-- `src/App.tsx`: minimal app container
-- `src/dashboard/DashboardPage.tsx`: chatbot + generated result
-- `src/dashboard/DashboardCanvas.tsx`: pure generated layout rendering
-- `src/dashboard/AIComposer.tsx`: minimal chatbot input
-- `src/dashboard/mockRag.ts`: retrieval simulation over built-in docs
-- `src/dashboard/mockAgent.ts`: prompt -> DashboardSpec generator
-- `src/dashboard/spec.ts`: JSON dashboard contract
-- `src/dashboard/specToNodes.ts`: spec -> `Node[]` adapter
-- `src/dashboard/fakeData.ts`: deterministic fake data generator
-- `src/dashboard/nodes.ts`: data → engine nodes mapping
-- `src/dashboard/DashboardWidget.tsx`: widget rendering by payload
-- `src/ui/*`: reusable dashboard components
-- `src/layout/useContainerWidth.ts`: resize observer hook
+- `src/dashboard/DashboardPage.tsx`: builder controls + generated node pipeline
+- `src/dashboard/componentFactory.ts`: component payload generation -> `Node[]`
+- `src/dashboard/DashboardCanvas.tsx`: render + drag/swap + layout recompute
+- `src/dashboard/DashboardWidget.tsx`: widget type rendering
+- `src/dashboard/types.ts`: typed payload contracts for UI components

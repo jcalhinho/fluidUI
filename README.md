@@ -116,10 +116,10 @@ A React dashboard demo is available at:
 - [`examples/react-dashboard`](examples/react-dashboard)
 
 It demonstrates:
-- chatbot-driven dashboard generation
-- strict JSON spec -> node mapping
+- engine-first UI component composition (no AI runtime dependency)
+- local component factory -> `Node[]` pipeline
 - predictive layout rendering
-- optional Ollama provider flow with fallback behavior
+- drag/swap interactions with deterministic relayout
 
 ## Development
 
@@ -132,11 +132,35 @@ It demonstrates:
 
 ```bash
 npm install
+npm run lint
 npm run typecheck
 npm run test
+npm run bench
 npm run build
+npm run lint:example
 npm run example:dashboard
 npm run example:react
+```
+
+## Use Via GitHub
+
+If you want users to consume the engine directly from GitHub (without npm publish), they can install the package from a branch, tag, or commit:
+
+```bash
+# Latest from default branch
+npm install git+https://github.com/<owner>/<repo>.git
+
+# Pin to a tag or commit
+npm install git+https://github.com/<owner>/<repo>.git#v0.1.0
+npm install git+https://github.com/<owner>/<repo>.git#<commit-sha>
+```
+
+The package runs `prepare` on Git installs, so `dist/` is built automatically.
+
+Then import it normally:
+
+```ts
+import { prepare, computeLayout } from "fluidui-layout-engine";
 ```
 
 ## Testing and Validation
@@ -146,6 +170,7 @@ Current automated validation includes:
 - boundary safety
 - cache stability
 - predictive pipeline advantage (`prepare once + layout many`)
+- benchmark gate (`bench/baseline.json` thresholds)
 
 See:
 - [`docs/USE_CASE_VALIDATION.md`](docs/USE_CASE_VALIDATION.md)
@@ -154,6 +179,7 @@ See:
 
 - Agent demo playbook: [`docs/AGENT_PLAYBOOK.md`](docs/AGENT_PLAYBOOK.md)
 - Use-case validation: [`docs/USE_CASE_VALIDATION.md`](docs/USE_CASE_VALIDATION.md)
+- Changelog: [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Contributing
 

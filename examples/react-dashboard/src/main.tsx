@@ -29,7 +29,6 @@ async function bootstrap(): Promise<void> {
   });
 
   // Useful signal in devtools to confirm whether Pretext is active.
-  // eslint-disable-next-line no-console
   console.info("[fluidUI] text measurement runtime:", getTextMeasurementRuntimeState());
 
   createRoot(mountNode).render(

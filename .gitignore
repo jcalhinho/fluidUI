@@ -6,6 +6,7 @@ examples/react-dashboard/node_modules/
 dist/
 examples/react-dashboard/dist/
 examples/react-dashboard/server/data/rag-store.json
+bench/results/
 
 # logs
 npm-debug.log*

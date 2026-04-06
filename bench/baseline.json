@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "datasetSize": 320,
+  "widthCount": 18,
+  "warmupRuns": 2,
+  "sampleRuns": 7,
+  "thresholds": {
+    "minSpeedup": 1.2,
+    "maxPredictiveTotalMs": 300,
+    "maxPrepareMs": 160
+  }
+}
