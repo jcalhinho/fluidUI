@@ -101,14 +101,17 @@ function buildSkeletonTemplates(): SkeletonTemplate[] {
 }
 
 const SKELETONS: readonly SkeletonTemplate[] = buildSkeletonTemplates();
+const DEFAULT_SKELETON: SkeletonTemplate =
+  SKELETONS.find(
+    (template) => template.layout === "grid" && template.density === "stress",
+  ) ?? SKELETONS[0]!;
 
 export function DashboardPage(): JSX.Element {
-  const defaultSkeleton = SKELETONS[0]!;
-  const [activeSkeleton, setActiveSkeleton] = useState<string>(defaultSkeleton.id);
-  const [layoutType, setLayoutType] = useState<LayoutType>(defaultSkeleton.layout);
-  const [density, setDensity] = useState<BuilderDensity>(defaultSkeleton.density);
-  const [seed, setSeed] = useState<number>(defaultSkeleton.seed);
-  const [widgetCounts, setWidgetCounts] = useState<WidgetCounts>(cloneCounts(defaultSkeleton.counts));
+  const [activeSkeleton, setActiveSkeleton] = useState<string>(DEFAULT_SKELETON.id);
+  const [layoutType, setLayoutType] = useState<LayoutType>(DEFAULT_SKELETON.layout);
+  const [density, setDensity] = useState<BuilderDensity>(DEFAULT_SKELETON.density);
+  const [seed, setSeed] = useState<number>(DEFAULT_SKELETON.seed);
+  const [widgetCounts, setWidgetCounts] = useState<WidgetCounts>(cloneCounts(DEFAULT_SKELETON.counts));
 
   const nodes = useMemo(
     () =>
