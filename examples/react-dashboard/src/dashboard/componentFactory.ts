@@ -237,7 +237,7 @@ function buildBigNumberPayload(index: number, random: () => number): BigNumberPa
   const base = 1_200_000 + index * 140_000 + Math.round(random() * 80_000);
   const delta = ((random() - 0.45) * 18).toFixed(1);
   const tone: Tone = Number(delta) >= 0 ? "positive" : "negative";
-  const deltaText = `${Number(delta) >= 0 ? "+" : "/core"}${delta}%`;
+  const deltaText = `${Number(delta) >= 0 ? "+" : ""}${delta}%`;
   return {
     widget: "bignumber",
     title: `Core Metric ${index + 1}`,
@@ -308,7 +308,7 @@ function buildKpiPayload(index: number, random: () => number): KpiPayload {
     title: `Pipeline ${index + 1}`,
     subtitle: "Conversion rate",
     value: `${(22 + random() * 14).toFixed(1)}%`,
-    delta: `${ratio >= 0 ? "+" : "/core"}${ratio.toFixed(1)}%`,
+    delta: `${ratio >= 0 ? "+" : ""}${ratio.toFixed(1)}%`,
     tone,
   };
 }
@@ -327,7 +327,7 @@ function buildLinePayload(index: number, random: () => number, density: BuilderD
     unit: "count",
     points,
     labels,
-    change: `${delta >= 0 ? "+" : "/core"}${delta.toFixed(1)}%`,
+    change: `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`,
     tone,
   };
 }
@@ -449,7 +449,7 @@ function buildTablePayload(index: number, random: () => number, density: Builder
     const row: Record<string, string> = {
       segment: `Segment ${String.fromCharCode(65 + rowIndex)}`,
       value: value.toLocaleString("en-US"),
-      change: `${Number(delta) >= 0 ? "+" : "/core"}${delta}%`,
+      change: `${Number(delta) >= 0 ? "+" : ""}${delta}%`,
       score: `${68 + rowIndex * 4 + index}`,
     };
     if (density === "stress") {

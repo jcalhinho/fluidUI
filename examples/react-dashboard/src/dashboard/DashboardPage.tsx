@@ -145,7 +145,7 @@ export function DashboardPage(): JSX.Element {
           <h2>Engine Builder</h2>
           <button
             type="button"
-            className={`builder-mobile-toggle ${isBuilderPanelOpen ? "is-open" : "/core"}`}
+            className={`builder-mobile-toggle ${isBuilderPanelOpen ? "is-open" : ""}`}
             onClick={() => setIsBuilderPanelOpen((previous) => !previous)}
             aria-expanded={isBuilderPanelOpen}
             aria-controls="builder-controls"
@@ -156,7 +156,7 @@ export function DashboardPage(): JSX.Element {
 
         <div
           id="builder-controls"
-          className={`builder-header-controls ${isBuilderPanelOpen ? "is-open" : "/core"}`}
+          className={`builder-header-controls ${isBuilderPanelOpen ? "is-open" : ""}`}
         >
           <div className="builder-control-group builder-control-group--template">
             <label htmlFor="builder-template-select" className="builder-template-select-label">
@@ -187,7 +187,7 @@ export function DashboardPage(): JSX.Element {
                 <button
                   key={option}
                   type="button"
-                  className={`builder-chip ${layoutType === option ? "is-active" : "/core"}`}
+                  className={`builder-chip ${layoutType === option ? "is-active" : ""}`}
                   onClick={() => {
                     setActiveSkeleton("custom");
                     setLayoutType(option);
@@ -206,7 +206,7 @@ export function DashboardPage(): JSX.Element {
                 <button
                   key={mode}
                   type="button"
-                  className={`builder-chip ${density === mode ? "is-active" : "/core"}`}
+                  className={`builder-chip ${density === mode ? "is-active" : ""}`}
                   onClick={() => {
                     setActiveSkeleton("custom");
                     setDensity(mode);

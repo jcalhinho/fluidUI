@@ -1,5 +1,5 @@
 import type { Node } from "@fluidui/core";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, memo } from "react";
 import { ActivityFeed } from "../ui/ActivityFeed";
 import { AlertsPanel } from "../ui/AlertsPanel";
 import { BigNumber } from "../ui/BigNumber";
@@ -85,7 +85,7 @@ function renderPayload(node: Node): JSX.Element {
   }
 }
 
-export function DashboardWidget({ node, isDragging = false, isLocked = false }: DashboardWidgetProps): JSX.Element {
+function DashboardWidgetComponent({ node, isDragging = false, isLocked = false }: DashboardWidgetProps): JSX.Element {
   const content = node.content;
   const title =
     isWidgetPayload(content) && "title" in content ? String(content.title) : node.id;
@@ -97,7 +97,7 @@ export function DashboardWidget({ node, isDragging = false, isLocked = false }: 
 
   return (
     <article
-      className={`widget widget-${widgetType}${isDragging ? " is-dragging" : "/core"}${isHeaderWidget ? " is-compact-header" : "/core"}`}
+      className={`widget widget-${widgetType}${isDragging ? " is-dragging" : ""}${isHeaderWidget ? " is-compact-header" : ""}`}
       aria-label={title}
     >
       {!isHeaderWidget && (
@@ -124,6 +124,9 @@ export function DashboardWidget({ node, isDragging = false, isLocked = false }: 
     </article>
   );
 }
+
+export const DashboardWidget = memo(DashboardWidgetComponent);
+DashboardWidget.displayName = "DashboardWidget";
 
 function extractInsight(content: unknown): WidgetInsight | null {
   if (!isWidgetPayload(content) || typeof content.insight !== "object" || content.insight === null) {
