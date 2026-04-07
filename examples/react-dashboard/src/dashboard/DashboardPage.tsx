@@ -112,6 +112,7 @@ export function DashboardPage(): JSX.Element {
   const [density, setDensity] = useState<BuilderDensity>(DEFAULT_SKELETON.density);
   const [seed, setSeed] = useState<number>(DEFAULT_SKELETON.seed);
   const [widgetCounts, setWidgetCounts] = useState<WidgetCounts>(cloneCounts(DEFAULT_SKELETON.counts));
+  const [isBuilderPanelOpen, setIsBuilderPanelOpen] = useState<boolean>(false);
 
   const nodes = useMemo(
     () =>
@@ -142,10 +143,21 @@ export function DashboardPage(): JSX.Element {
       <header className="builder-header-bar">
         <div className="builder-header-title">
           <h2>Engine Builder</h2>
-          
+          <button
+            type="button"
+            className={`builder-mobile-toggle ${isBuilderPanelOpen ? "is-open" : "/core"}`}
+            onClick={() => setIsBuilderPanelOpen((previous) => !previous)}
+            aria-expanded={isBuilderPanelOpen}
+            aria-controls="builder-controls"
+          >
+            {isBuilderPanelOpen ? "Close" : "Open"}
+          </button>
         </div>
 
-        <div className="builder-header-controls">
+        <div
+          id="builder-controls"
+          className={`builder-header-controls ${isBuilderPanelOpen ? "is-open" : "/core"}`}
+        >
           <div className="builder-control-group builder-control-group--template">
             <label htmlFor="builder-template-select" className="builder-template-select-label">
               Template ({SKELETONS.length})
