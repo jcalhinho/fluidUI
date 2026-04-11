@@ -356,7 +356,7 @@ interface DragState {
 export function DashboardCanvas({ nodes, layoutType = "grid" }: DashboardCanvasProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const containerWidth = useContainerWidth(containerRef, 1200);
+  const containerWidth = useContainerWidth(containerRef);
   const [viewport, setViewport] = useState<ViewportSnapshot>({
     width: 0,
     height: 0,
@@ -481,6 +481,7 @@ export function DashboardCanvas({ nodes, layoutType = "grid" }: DashboardCanvasP
   );
 
   const baseBoxesLocal = useMemo(() => {
+    if (effectiveWidth === 0) return [];
     return computeLayout(prepared, {
       width: contentWidth,
       type: layoutType,
@@ -489,7 +490,7 @@ export function DashboardCanvas({ nodes, layoutType = "grid" }: DashboardCanvasP
       columns,
       minColumnWidth: 280,
     });
-  }, [prepared, contentWidth, layoutType, columns]);
+  }, [prepared, effectiveWidth, contentWidth, layoutType, columns]);
 
   const baseBoxesGlobal = useMemo(
     () =>

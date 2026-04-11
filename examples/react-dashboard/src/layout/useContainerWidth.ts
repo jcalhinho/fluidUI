@@ -2,9 +2,12 @@ import { useEffect, useState, type RefObject } from "react";
 
 export function useContainerWidth(
   ref: RefObject<HTMLElement>,
-  fallbackWidth = 1200,
+  fallbackWidth?: number,
 ): number {
-  const [width, setWidth] = useState<number>(fallbackWidth);
+  const [width, setWidth] = useState(() => {
+    if (typeof window === "undefined") return fallbackWidth ?? 0;
+    return ref.current?.clientWidth ?? fallbackWidth ?? window.innerWidth ?? 0;
+  });
 
   useEffect(() => {
     const element = ref.current;
@@ -21,7 +24,6 @@ export function useContainerWidth(
 
     const observer = new ResizeObserver(update);
     observer.observe(element);
-    update();
 
     return () => observer.disconnect();
   }, [ref]);
