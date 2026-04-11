@@ -34,8 +34,6 @@ export function computeMasonryLayout(
 
   // columnHeights[c] = Y where the NEXT item in column c would start
   const columnHeights = new Array<number>(resolvedColumns).fill(safePadding);
-  // Track the index of the last box placed in each column (-1 = empty column)
-  const lastBoxIndexPerColumn = new Array<number>(resolvedColumns).fill(-1);
   const boxes: LayoutBox[] = [];
 
   for (const preparedNode of preparedNodes) {
@@ -50,30 +48,8 @@ export function computeMasonryLayout(
       height
     };
 
-    lastBoxIndexPerColumn[targetColumn] = boxes.length;
     boxes.push(box);
     columnHeights[targetColumn] = (columnHeights[targetColumn] ?? 0) + height + safeGap;
-  }
-
-  if (boxes.length === 0) return boxes;
-
-  // ── Fill pass ─────────────────────────────────────────────────────────────
-  // Each column's natural bottom = top of last item's bottom edge (excl. trailing gap).
-  // We stretch the last item in each shorter column to align with the tallest column,
-  // eliminating orphan blank space at the bottom.
-  const naturalBottomPerColumn = columnHeights.map((h, col) =>
-    lastBoxIndexPerColumn[col]! >= 0 ? h - safeGap : safePadding
-  );
-  const maxBottom = Math.max(...naturalBottomPerColumn);
-
-  for (let col = 0; col < resolvedColumns; col++) {
-    const idx = lastBoxIndexPerColumn[col];
-    if (idx === undefined || idx < 0) continue;
-    const colBottom = naturalBottomPerColumn[col] ?? safePadding;
-    if (maxBottom > colBottom + 1) {
-      // Stretch last item in this column to reach the tallest column bottom
-      boxes[idx]!.height = maxBottom - boxes[idx]!.y;
-    }
   }
 
   return boxes;
@@ -96,6 +72,10 @@ function resolveColumnCount(
 }
 
 function indexOfShortestColumn(columnHeights: ReadonlyArray<number>): number {
+  if (columnHeights.length === 0) {
+    throw new Error("columnHeights cannot be empty");
+  }
+
   let shortestIndex = 0;
   let shortestHeight = columnHeights[0]!;
 

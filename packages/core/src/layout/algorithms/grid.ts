@@ -23,8 +23,6 @@ export function computeGridLayout(
   }
 
   const boxes: LayoutBox[] = [];
-  // Track the starting column index of each box in the current row
-  const rowStartColumns: number[] = [];
 
   let currentColumn = 0;
   let currentRowY = safePadding;
@@ -35,13 +33,12 @@ export function computeGridLayout(
     const span = computeSpan(preparedNode, columnWidth, safeGap);
 
     if (currentColumn + span > GRID_COLUMNS) {
-      // Commit current row: equalize heights and fill last item width
-      finalizeRow(boxes, rowStart, boxes.length, currentRowHeight, safePadding, availableWidth);
+      // Commit current row: equalize heights
+      finalizeRow(boxes, rowStart, boxes.length, currentRowHeight);
       currentRowY += currentRowHeight + safeGap;
       currentColumn = 0;
       currentRowHeight = 0;
       rowStart = boxes.length;
-      rowStartColumns.length = 0;
     }
 
     const width = span * columnWidth + (span - 1) * safeGap;
@@ -61,38 +58,25 @@ export function computeGridLayout(
 
   // Finalize last row
   if (boxes.length > rowStart) {
-    finalizeRow(boxes, rowStart, boxes.length, currentRowHeight, safePadding, availableWidth);
+    finalizeRow(boxes, rowStart, boxes.length, currentRowHeight);
   }
 
   return boxes;
 }
 
 /**
- * For boxes[rowStart..rowEnd):
- * 1. Equalize all heights to the row max height (no item shorter than its neighbours).
- * 2. Stretch the last item's width to the right edge so no horizontal gap remains.
+ * Equalize all heights to the row max height (no item shorter than its neighbours).
  */
 function finalizeRow(
   boxes: LayoutBox[],
   rowStart: number,
   rowEnd: number,
-  rowHeight: number,
-  padding: number,
-  availableWidth: number
+  rowHeight: number
 ): void {
   if (rowStart >= rowEnd) return;
 
-  // 1. Equalize heights
   for (let i = rowStart; i < rowEnd; i++) {
     boxes[i]!.height = rowHeight;
-  }
-
-  // 2. Stretch last item to right edge
-  const lastBox = boxes[rowEnd - 1]!;
-  const rightEdge = padding + availableWidth;
-  const currentRight = lastBox.x + lastBox.width;
-  if (rightEdge > currentRight + 1) {
-    lastBox.width = rightEdge - lastBox.x;
   }
 }
 

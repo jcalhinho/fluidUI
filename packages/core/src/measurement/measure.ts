@@ -182,7 +182,7 @@ function measureCustom(node: Node, width: number): Size {
   };
 }
 
-function extractText(content: unknown): string {
+function extractText(content: unknown, seen: WeakSet<object> = new WeakSet<object>()): string {
   if (typeof content === "string") {
     return content;
   }
@@ -196,12 +196,18 @@ function extractText(content: unknown): string {
   }
 
   if (Array.isArray(content)) {
-    return content.map((entry) => extractText(entry)).join(" ");
+    return content.map((entry) => extractText(entry, seen)).join(" ");
   }
 
   if (typeof content === "object") {
-    return Object.values(content as Record<string, unknown>)
-      .map((entry) => extractText(entry))
+    if (seen.has(content)) {
+      return "";
+    }
+
+    seen.add(content);
+
+    return Object.values(content)
+      .map((entry) => extractText(entry, seen))
       .join(" ");
   }
 
