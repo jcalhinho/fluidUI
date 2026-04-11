@@ -23,8 +23,6 @@ export function computeGridLayout(
   }
 
   const boxes: LayoutBox[] = [];
-  // Track the starting column index of each box in the current row
-  const rowStartColumns: number[] = [];
 
   let currentColumn = 0;
   let currentRowY = safePadding;
@@ -41,7 +39,6 @@ export function computeGridLayout(
       currentColumn = 0;
       currentRowHeight = 0;
       rowStart = boxes.length;
-      rowStartColumns.length = 0;
     }
 
     const width = span * columnWidth + (span - 1) * safeGap;

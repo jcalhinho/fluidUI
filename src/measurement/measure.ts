@@ -1,6 +1,7 @@
 import type { Node, Size } from "../types";
 import { clampWidth, normalizeConstraints, stableSerialize } from "../utils";
 
+// Heuristic measurement constants for fallback when Pretext is unavailable
 const TEXT_CHAR_WIDTH = 7;
 const TEXT_LINE_HEIGHT = 20;
 const TEXT_HORIZONTAL_PADDING = 16;
@@ -200,7 +201,7 @@ function extractText(content: unknown): string {
   }
 
   if (typeof content === "object") {
-    return Object.values(content as Record<string, unknown>)
+    return Object.values(content)
       .map((entry) => extractText(entry))
       .join(" ");
   }

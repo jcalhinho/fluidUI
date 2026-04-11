@@ -96,6 +96,10 @@ function resolveColumnCount(
 }
 
 function indexOfShortestColumn(columnHeights: ReadonlyArray<number>): number {
+  if (columnHeights.length === 0) {
+    throw new Error("columnHeights cannot be empty");
+  }
+
   let shortestIndex = 0;
   let shortestHeight = columnHeights[0]!;
 

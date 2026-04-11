@@ -13,14 +13,14 @@ export function coercePositiveNumber(value: unknown, fallback: number): number {
 }
 
 export function normalizeConstraints(constraints?: NodeConstraints): NormalizedConstraints {
-  const minWidth = coerceNonNegative(constraints?.minWidth, 0);
+  const minWidth = coerceNonNegativeNumber(constraints?.minWidth, 0);
   const maxCandidate =
     typeof constraints?.maxWidth === "number" && Number.isFinite(constraints.maxWidth)
       ? constraints.maxWidth
       : Number.POSITIVE_INFINITY;
   const maxWidth = Math.max(minWidth, maxCandidate);
-  const grow = coerceNonNegative(constraints?.grow, 0);
-  const shrink = coerceNonNegative(constraints?.shrink, 1);
+  const grow = coerceNonNegativeNumber(constraints?.grow, 0);
+  const shrink = coerceNonNegativeNumber(constraints?.shrink, 1);
 
   return { minWidth, maxWidth, grow, shrink };
 }
@@ -62,6 +62,8 @@ export function nearestMeasurement(
 
   return best;
 }
+
+import { coerceNonNegativeNumber } from "./layout/shared";
 
 export function normalizeWidthBuckets(widthBuckets: ReadonlyArray<number>): number[] {
   const normalized = Array.from(
@@ -122,7 +124,7 @@ export function stableSerialize(value: unknown): string {
 
       seen.add(input);
 
-      const entries = Object.entries(input as Record<string, unknown>)
+      const entries = Object.entries(input)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, entryValue]) => `${JSON.stringify(key)}:${serialize(entryValue)}`)
         .join(",");
@@ -134,8 +136,4 @@ export function stableSerialize(value: unknown): string {
   };
 
   return serialize(value);
-}
-
-function coerceNonNegative(value: unknown, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : fallback;
 }
