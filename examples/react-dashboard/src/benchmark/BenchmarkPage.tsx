@@ -19,7 +19,7 @@ interface PaneStats {
 
 const HISTORY_LENGTH = 90;
 const FRAME_BUDGET_MS = 16.7;
-const BAR_SCALE_MS = 40;
+const BAR_SCALE_MS = 80;
 const LAYOUT_GAP = 12;
 const LAYOUT_PADDING = 16;
 const MIN_WIDTH = 480;
@@ -38,10 +38,7 @@ function medianOf(buffer: ReadonlyArray<number>): number {
   return sorted[Math.floor(sorted.length / 2)]!;
 }
 
-function recordSample(
-  previous: PaneStats,
-  value: number
-): PaneStats {
+function recordSample(previous: PaneStats, value: number): PaneStats {
   const history = [...previous.history, value];
   if (history.length > HISTORY_LENGTH) history.shift();
   return {
@@ -78,7 +75,7 @@ function makeNodes(count: number, seed: number): Node[] {
       type: kind,
       content: {
         title: `Widget ${index + 1}`,
-        body: "Benchmark payload with a few lines of representative content."
+        body: "Representative widget content that must be re-measured by the browser whenever the container width changes."
       },
       intrinsicSize: { width, height }
     });
@@ -169,7 +166,7 @@ function BoxPane({ title, subtitle, accent, stats, boxes, canvasWidth, canvasHei
 }
 
 export function BenchmarkPage(): JSX.Element {
-  const [nodeCount, setNodeCount] = useState<number>(400);
+  const [nodeCount, setNodeCount] = useState<number>(1000);
   const [layoutType, setLayoutType] = useState<LayoutType>("masonry");
   const [mode, setMode] = useState<BenchMode>("play");
 
@@ -177,6 +174,10 @@ export function BenchmarkPage(): JSX.Element {
 
   // fluidUI pipeline: prepare ONCE, then layout many times.
   const preparedOnce = useMemo<PreparedNode[]>(() => prepare(nodes), [nodes]);
+
+  // Hidden DOM layer used by the naive pane to perform REAL geometry reads
+  // (offsetHeight), exactly like a DOM-coupled dashboard would every frame.
+  const measureLayerRef = useRef<HTMLDivElement>(null);
 
   const [width, setWidth] = useState<number>(960);
   const [naiveStats, setNaiveStats] = useState<PaneStats>(EMPTY_STATS);
@@ -221,16 +222,27 @@ export function BenchmarkPage(): JSX.Element {
         minColumnWidth: 260
       };
 
-      // Naive flow: re-measure (prepare) on EVERY width change, like a
-      // DOM-coupled pipeline re-reading geometry each frame.
+      // ── Naive flow (DOM-coupled, like a real dashboard) ──────────────────
+      // 1. Resize the live DOM container to the new width.
+      // 2. Read real geometry (offsetHeight) → forces a synchronous reflow
+      //    of every widget, exactly what DOM-coupled layouts pay each frame.
+      // 3. Compute the layout from the fresh measurements.
+      const layer = measureLayerRef.current;
       const naiveStart = performance.now();
+      if (layer) {
+        layer.style.width = `${nextWidth}px`;
+        const children = layer.children;
+        for (let index = 0; index < children.length; index += 1) {
+          void (children[index] as HTMLElement).offsetHeight;
+        }
+      }
       const naivePrepared = prepare(nodes);
       const naiveLayout = computeLayout(naivePrepared, options);
       const naiveMs = performance.now() - naiveStart;
       naiveBoxesRef.current = naiveLayout;
       setNaiveStats((previous) => recordSample(previous, naiveMs));
 
-      // Predictive flow: layout only, on already-prepared nodes.
+      // ── Predictive flow: layout only, on already-prepared nodes. ─────────
       const predictiveStart = performance.now();
       const predictiveLayout = computeLayout(preparedOnce, options);
       const predictiveMs = performance.now() - predictiveStart;
@@ -245,10 +257,14 @@ export function BenchmarkPage(): JSX.Element {
     return () => cancelAnimationFrame(rafId);
   }, [mode, nodes, preparedOnce, layoutType]);
 
+  // performance.now() resolution can read 0 for sub-5µs layouts; floor the
+  // denominator so the ratio stays meaningful when fluidUI is too fast.
   const speedup =
-    predictiveStats.medianMs > 0.001
-      ? naiveStats.medianMs / predictiveStats.medianMs
+    naiveStats.medianMs > 0
+      ? naiveStats.medianMs / Math.max(predictiveStats.medianMs, 0.005)
       : 0;
+  const speedupLabel =
+    speedup >= 1000 ? "1000x+" : speedup > 0 ? `${speedup.toFixed(1)}x` : "—";
 
   const canvasHeight = useMemo(() => {
     const bottom = predictiveBoxes.reduce(
@@ -262,7 +278,7 @@ export function BenchmarkPage(): JSX.Element {
     <section className="bench-page">
       <div className="bench-hero" role="status">
         <span className="bench-speedup-label">fluidUI is</span>
-        <span className="bench-speedup-value">{speedup > 0 ? `${speedup.toFixed(1)}x` : "—"}</span>
+        <span className="bench-speedup-value">{speedupLabel}</span>
         <span className="bench-speedup-label">faster per relayout</span>
       </div>
 
@@ -306,17 +322,19 @@ export function BenchmarkPage(): JSX.Element {
 
       <p className="bench-explainer">
         The container width animates continuously. The left pane replays the
-        DOM-coupled flow (measure + layout on every width change); the right
-        pane uses the predictive pipeline (<code>prepare()</code> once,{" "}
-        <code>computeLayout()</code> on every width change). Same dataset, same
-        options — only the pipeline differs. Watch the latency bars: red bars
-        mean the frame budget is blown and users would feel the stutter.
+        DOM-coupled flow: it resizes a live container and reads real geometry
+        (<code>offsetHeight</code>) on every widget — a forced synchronous
+        reflow — before computing the layout. The right pane uses the
+        predictive pipeline (<code>prepare()</code> once,{" "}
+        <code>computeLayout()</code> on every width change) and never touches
+        the DOM for measurements. Same dataset, same options — only the
+        pipeline differs.
       </p>
 
       <div className="bench-panes">
         <BoxPane
-          title="Naive"
-          subtitle="prepare() + computeLayout() on every width change"
+          title="Naive · DOM measurement"
+          subtitle="offsetHeight reflow + layout on every width change"
           accent="#f87171"
           stats={naiveStats}
           boxes={naiveBoxes}
@@ -324,7 +342,7 @@ export function BenchmarkPage(): JSX.Element {
           canvasHeight={canvasHeight}
         />
         <BoxPane
-          title="fluidUI"
+          title="fluidUI · predictive"
           subtitle="prepare() once, computeLayout() on every width change"
           accent="#60a5fa"
           stats={predictiveStats}
@@ -332,6 +350,42 @@ export function BenchmarkPage(): JSX.Element {
           canvasWidth={width}
           canvasHeight={canvasHeight}
         />
+      </div>
+
+      {/* Hidden live container the naive pane measures every frame.
+          Each item mirrors the DOM complexity of a real dashboard widget. */}
+      <div ref={measureLayerRef} className="bench-measure-layer" aria-hidden="true">
+        {nodes.map((node) => {
+          const title =
+            node.content && typeof node.content === "object" && "title" in node.content
+              ? String(node.content.title)
+              : "";
+          const body =
+            node.content && typeof node.content === "object" && "body" in node.content
+              ? String(node.content.body)
+              : "";
+          return (
+            <div key={node.id} className="bench-measure-item">
+              <div className="bench-measure-head">
+                <strong>{title}</strong>
+                <em>live</em>
+              </div>
+              <div className="bench-measure-kpis">
+                <div><i>KPI 1</i><b>42 000</b></div>
+                <div><i>KPI 2</i><b>+6.2%</b></div>
+                <div><i>KPI 3</i><b>98.1</b></div>
+              </div>
+              <p>{body}</p>
+              <div className="bench-measure-chart">
+                <span /><span /><span /><span /><span /><span />
+              </div>
+              <div className="bench-measure-foot">
+                <span>updated 2 min ago</span>
+                <span>source: pipeline</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

@@ -2463,3 +2463,103 @@ body,
   letter-spacing: 0.04em;
   color: #7d93b2;
 }
+
+/* Hidden live container measured by the naive pane (real reflow cost). */
+.bench-measure-layer {
+  position: absolute;
+  left: -100000px;
+  top: 0;
+  width: 960px;
+  padding: 16px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.bench-measure-item {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  background: #16202f;
+}
+
+.bench-measure-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.bench-measure-head strong {
+  font-size: 0.8rem;
+  color: #cfe4ff;
+}
+
+.bench-measure-head em {
+  font-size: 0.62rem;
+  font-style: normal;
+  color: #4ade80;
+}
+
+.bench-measure-kpis {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.bench-measure-kpis > div {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.bench-measure-kpis i {
+  display: block;
+  font-size: 0.58rem;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8fb3dd;
+}
+
+.bench-measure-kpis b {
+  font-size: 0.78rem;
+  color: #e8f2ff;
+}
+
+.bench-measure-item p {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #8aa2c0;
+}
+
+.bench-measure-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 42px;
+  margin-bottom: 8px;
+}
+
+.bench-measure-chart span {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background: rgba(96, 165, 250, 0.45);
+}
+
+.bench-measure-chart span:nth-child(1) { height: 40%; }
+.bench-measure-chart span:nth-child(2) { height: 65%; }
+.bench-measure-chart span:nth-child(3) { height: 50%; }
+.bench-measure-chart span:nth-child(4) { height: 85%; }
+.bench-measure-chart span:nth-child(5) { height: 70%; }
+.bench-measure-chart span:nth-child(6) { height: 95%; }
+
+.bench-measure-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6rem;
+  color: #7d93b2;
+}
