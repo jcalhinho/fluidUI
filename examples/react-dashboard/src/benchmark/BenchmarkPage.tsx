@@ -10,20 +10,27 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type BenchMode = "play" | "pause";
 
-interface TimingStats {
+interface PaneStats {
   lastMs: number;
   medianMs: number;
-  samples: number;
+  overBudget: number;
+  history: number[];
 }
 
-const SAMPLE_WINDOW = 120;
+const HISTORY_LENGTH = 90;
+const FRAME_BUDGET_MS = 16.7;
+const BAR_SCALE_MS = 40;
 const LAYOUT_GAP = 12;
 const LAYOUT_PADDING = 16;
 const MIN_WIDTH = 480;
 const MAX_WIDTH = 1400;
-const TICK_MS = 33;
 
-const EMPTY_STATS: TimingStats = { lastMs: 0, medianMs: 0, samples: 0 };
+const EMPTY_STATS: PaneStats = {
+  lastMs: 0,
+  medianMs: 0,
+  overBudget: 0,
+  history: []
+};
 
 function medianOf(buffer: ReadonlyArray<number>): number {
   if (buffer.length === 0) return 0;
@@ -31,13 +38,17 @@ function medianOf(buffer: ReadonlyArray<number>): number {
   return sorted[Math.floor(sorted.length / 2)]!;
 }
 
-function recordSample(buffer: number[], value: number): TimingStats {
-  buffer.push(value);
-  if (buffer.length > SAMPLE_WINDOW) buffer.shift();
+function recordSample(
+  previous: PaneStats,
+  value: number
+): PaneStats {
+  const history = [...previous.history, value];
+  if (history.length > HISTORY_LENGTH) history.shift();
   return {
     lastMs: value,
-    medianMs: medianOf(buffer),
-    samples: buffer.length
+    medianMs: medianOf(history),
+    overBudget: previous.overBudget + (value > FRAME_BUDGET_MS ? 1 : 0),
+    history
   };
 }
 
@@ -76,32 +87,57 @@ function makeNodes(count: number, seed: number): Node[] {
   return nodes;
 }
 
+function LatencyBars({ history, accent }: { history: number[]; accent: string }): JSX.Element {
+  return (
+    <div className="bench-bars" aria-hidden="true">
+      {Array.from({ length: HISTORY_LENGTH }, (_, index) => {
+        const value = history[index];
+        const heightPercent = value === undefined ? 0 : Math.min(100, (value / BAR_SCALE_MS) * 100);
+        const overBudget = value !== undefined && value > FRAME_BUDGET_MS;
+        return (
+          <span
+            key={index}
+            className={`bench-bar ${overBudget ? "is-over" : ""}`}
+            style={{
+              height: `${heightPercent}%`,
+              backgroundColor: overBudget ? undefined : accent
+            }}
+          />
+        );
+      })}
+      <span className="bench-bars-budget" style={{ bottom: `${(FRAME_BUDGET_MS / BAR_SCALE_MS) * 100}%` }} />
+    </div>
+  );
+}
+
 interface PaneProps {
   title: string;
   subtitle: string;
   accent: string;
-  stats: TimingStats;
+  stats: PaneStats;
   boxes: ReadonlyArray<LayoutBox>;
   canvasWidth: number;
   canvasHeight: number;
 }
 
 function BoxPane({ title, subtitle, accent, stats, boxes, canvasWidth, canvasHeight }: PaneProps): JSX.Element {
+  const janked = stats.overBudget > 0;
+
   return (
-    <section className="bench-pane">
+    <section className={`bench-pane ${janked ? "is-janked" : ""}`}>
       <header className="bench-pane-header">
-        <div>
+        <div className="bench-pane-heading">
           <h3 className="bench-pane-title" style={{ color: accent }}>{title}</h3>
           <p className="bench-pane-subtitle">{subtitle}</p>
         </div>
         <div className="bench-pane-stats">
           <span className="bench-stat">
-            <span className="bench-stat-label">last</span>
-            <span className="bench-stat-value">{stats.lastMs.toFixed(2)} ms</span>
-          </span>
-          <span className="bench-stat">
             <span className="bench-stat-label">median</span>
             <span className="bench-stat-value">{stats.medianMs.toFixed(2)} ms</span>
+          </span>
+          <span className="bench-stat">
+            <span className="bench-stat-label">over budget</span>
+            <span className={`bench-stat-value ${janked ? "is-over" : ""}`}>{stats.overBudget}</span>
           </span>
         </div>
       </header>
@@ -122,12 +158,18 @@ function BoxPane({ title, subtitle, accent, stats, boxes, canvasWidth, canvasHei
           ))}
         </div>
       </div>
+      <footer className="bench-pane-footer">
+        <LatencyBars history={stats.history} accent={accent} />
+        <span className="bench-bars-caption">
+          layout cost per width change · red line = {FRAME_BUDGET_MS} ms frame budget
+        </span>
+      </footer>
     </section>
   );
 }
 
 export function BenchmarkPage(): JSX.Element {
-  const [nodeCount, setNodeCount] = useState<number>(120);
+  const [nodeCount, setNodeCount] = useState<number>(400);
   const [layoutType, setLayoutType] = useState<LayoutType>("masonry");
   const [mode, setMode] = useState<BenchMode>("play");
 
@@ -137,11 +179,9 @@ export function BenchmarkPage(): JSX.Element {
   const preparedOnce = useMemo<PreparedNode[]>(() => prepare(nodes), [nodes]);
 
   const [width, setWidth] = useState<number>(960);
-  const [naiveStats, setNaiveStats] = useState<TimingStats>(EMPTY_STATS);
-  const [predictiveStats, setPredictiveStats] = useState<TimingStats>(EMPTY_STATS);
+  const [naiveStats, setNaiveStats] = useState<PaneStats>(EMPTY_STATS);
+  const [predictiveStats, setPredictiveStats] = useState<PaneStats>(EMPTY_STATS);
 
-  const naiveBufferRef = useRef<number[]>([]);
-  const predictiveBufferRef = useRef<number[]>([]);
   const naiveBoxesRef = useRef<LayoutBox[]>([]);
   const predictiveBoxesRef = useRef<LayoutBox[]>([]);
   const [naiveBoxes, setNaiveBoxes] = useState<LayoutBox[]>([]);
@@ -149,10 +189,10 @@ export function BenchmarkPage(): JSX.Element {
 
   // Reset stats when the dataset or layout changes.
   useEffect(() => {
-    naiveBufferRef.current = [];
-    predictiveBufferRef.current = [];
     setNaiveStats(EMPTY_STATS);
     setPredictiveStats(EMPTY_STATS);
+    setNaiveBoxes([]);
+    setPredictiveBoxes([]);
   }, [nodes, layoutType]);
 
   useEffect(() => {
@@ -164,10 +204,10 @@ export function BenchmarkPage(): JSX.Element {
 
     const tick = (now: number): void => {
       rafId = requestAnimationFrame(tick);
-      if (now - lastTick < TICK_MS) return;
+      if (now - lastTick < 16) return;
       lastTick = now;
 
-      phase += 0.045;
+      phase += 0.05;
       const nextWidth = Math.round(
         MIN_WIDTH + (MAX_WIDTH - MIN_WIDTH) * (0.5 + 0.5 * Math.sin(phase))
       );
@@ -188,14 +228,14 @@ export function BenchmarkPage(): JSX.Element {
       const naiveLayout = computeLayout(naivePrepared, options);
       const naiveMs = performance.now() - naiveStart;
       naiveBoxesRef.current = naiveLayout;
-      setNaiveStats(recordSample(naiveBufferRef.current, naiveMs));
+      setNaiveStats((previous) => recordSample(previous, naiveMs));
 
       // Predictive flow: layout only, on already-prepared nodes.
       const predictiveStart = performance.now();
       const predictiveLayout = computeLayout(preparedOnce, options);
       const predictiveMs = performance.now() - predictiveStart;
       predictiveBoxesRef.current = predictiveLayout;
-      setPredictiveStats(recordSample(predictiveBufferRef.current, predictiveMs));
+      setPredictiveStats((previous) => recordSample(previous, predictiveMs));
 
       setNaiveBoxes(naiveBoxesRef.current);
       setPredictiveBoxes(predictiveBoxesRef.current);
@@ -220,10 +260,16 @@ export function BenchmarkPage(): JSX.Element {
 
   return (
     <section className="bench-page">
+      <div className="bench-hero" role="status">
+        <span className="bench-speedup-label">fluidUI is</span>
+        <span className="bench-speedup-value">{speedup > 0 ? `${speedup.toFixed(1)}x` : "—"}</span>
+        <span className="bench-speedup-label">faster per relayout</span>
+      </div>
+
       <header className="bench-toolbar">
         <div className="bench-toolbar-group">
           <span className="bench-toolbar-label">Widgets</span>
-          {([60, 120, 240] as const).map((count) => (
+          {([120, 400, 1000] as const).map((count) => (
             <button
               key={count}
               type="button"
@@ -256,10 +302,6 @@ export function BenchmarkPage(): JSX.Element {
             {mode === "play" ? "⏸ Pause" : "▶ Run"}
           </button>
         </div>
-        <div className="bench-speedup" role="status">
-          <span className="bench-speedup-label">speedup</span>
-          <span className="bench-speedup-value">{speedup > 0 ? `${speedup.toFixed(1)}x` : "—"}</span>
-        </div>
       </header>
 
       <p className="bench-explainer">
@@ -267,7 +309,8 @@ export function BenchmarkPage(): JSX.Element {
         DOM-coupled flow (measure + layout on every width change); the right
         pane uses the predictive pipeline (<code>prepare()</code> once,{" "}
         <code>computeLayout()</code> on every width change). Same dataset, same
-        options — only the pipeline differs.
+        options — only the pipeline differs. Watch the latency bars: red bars
+        mean the frame budget is blown and users would feel the stutter.
       </p>
 
       <div className="bench-panes">
