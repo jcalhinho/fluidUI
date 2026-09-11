@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { AboutPage } from "./about/AboutPage";
+import { BenchmarkPage } from "./benchmark/BenchmarkPage";
 import { DashboardPage } from "./dashboard/DashboardPage";
 
-type AppView = "builder" | "about";
+type AppView = "builder" | "benchmark" | "about";
 
 function resolveViewFromHash(hashValue: string): AppView {
   const normalizedHash = hashValue.trim().toLowerCase();
-  return normalizedHash.startsWith("#about") ? "about" : "builder";
+  if (normalizedHash.startsWith("#about")) return "about";
+  if (normalizedHash.startsWith("#benchmark")) return "benchmark";
+  return "builder";
 }
 
 export function App(): JSX.Element {
@@ -33,7 +36,7 @@ export function App(): JSX.Element {
     setView(nextView);
     if (typeof window === "undefined") return;
 
-    const nextHash = nextView === "about" ? "#about" : "#builder";
+    const nextHash = nextView === "builder" ? "#builder" : `#${nextView}`;
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
@@ -54,6 +57,13 @@ export function App(): JSX.Element {
             </button>
             <button
               type="button"
+              className={`demo-tab ${view === "benchmark" ? "is-active" : ""}`}
+              onClick={() => switchToView("benchmark")}
+            >
+              Benchmark
+            </button>
+            <button
+              type="button"
               className={`demo-tab ${view === "about" ? "is-active" : ""}`}
               onClick={() => switchToView("about")}
             >
@@ -62,7 +72,7 @@ export function App(): JSX.Element {
           </nav>
         </header>
         <section className={`demo-stage ${view === "about" ? "is-scrollable" : ""}`}>
-          {view === "about" ? <AboutPage /> : <DashboardPage />}
+          {view === "about" ? <AboutPage /> : view === "benchmark" ? <BenchmarkPage /> : <DashboardPage />}
         </section>
       </section>
     </main>
