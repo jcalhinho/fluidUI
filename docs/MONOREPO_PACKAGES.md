@@ -42,13 +42,13 @@ packages/
 
 ## Migration Plan
 
-1. Scaffold package directories and contracts.
-2. Mirror current engine code into `packages/core`.
-3. Keep current root package operational during transition.
-4. Introduce workspaces and internal package links.
-5. Switch example app imports from `@engine` to `@fluidui/core`.
-6. Gradually move renderer-specific helpers into adapters.
-7. Convert root package to compatibility wrapper or deprecate.
+1. Scaffold package directories and contracts. ✅
+2. Mirror current engine code into `packages/core`. ✅
+3. Keep current root package operational during transition. ✅
+4. Introduce workspaces and internal package links. ✅
+5. Switch example app imports from `@engine` to `@fluidui/core`. ✅
+6. Gradually move renderer-specific helpers into adapters. ✅
+7. Convert root package to compatibility wrapper or deprecate. ✅
 
 ## Done in this scaffold
 
@@ -56,8 +56,10 @@ packages/
 - `packages/adapter-react` created with absolute-style and binding utilities.
 - `packages/adapter-canvas` created with draw-command mapping and hit-testing.
 
-## Suggested next commits
+## Completed migration (single source of truth)
 
-1. `chore(monorepo): enable npm workspaces and package-level builds`
-2. `refactor(example): consume @fluidui/core from react dashboard`
-3. `refactor(core): move remaining root-engine source of truth into packages/core`
+`packages/core/src` is now the **only** engine source tree. The former root
+`src/` duplicate (which had already drifted from `packages/core/src`) has been
+removed. The root npm package `fluidui-layout-engine` builds directly from
+`packages/core/src` (`main: dist/packages/core/src/index.js`), so there is no
+longer any mirrored code to keep in sync.

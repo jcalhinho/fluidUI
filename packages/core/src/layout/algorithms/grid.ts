@@ -65,6 +65,7 @@ export function computeGridLayout(
 }
 
 /**
+ * For boxes[rowStart..rowEnd):
  * Equalize all heights to the row max height (no item shorter than its neighbours).
  */
 function finalizeRow(

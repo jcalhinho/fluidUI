@@ -2,7 +2,7 @@ import { performance } from "node:perf_hooks";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { computeLayout, prepare, type Node } from "../../src";
+import { computeLayout, prepare, type Node } from "../../packages/core/src";
 
 interface BenchmarkThresholds {
   minSpeedup: number;

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { computeLayout, prepare, type Node } from "../src";
+import { computeLayout, prepare, type Node } from "../packages/core/src";
 
 const nodes: Node[] = [
   { id: "n1", type: "card", content: { title: "A", body: "small" } },

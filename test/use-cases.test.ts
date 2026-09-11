@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { performance } from "node:perf_hooks";
-import { computeLayout, prepare, type LayoutBox, type LayoutType, type Node } from "../src";
+import { computeLayout, prepare, type LayoutBox, type LayoutType, type Node } from "../packages/core/src";
 
 type DashboardWidgetKind = "kpi" | "compare" | "trend" | "table" | "summary";
 

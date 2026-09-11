@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { prepare, type Node } from "../src";
+import { prepare, type Node } from "../packages/core/src";
 
 test("prepare returns normalized prepared nodes with cached measurements", () => {
   const nodes: Node[] = [
